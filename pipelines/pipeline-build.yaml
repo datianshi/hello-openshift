@@ -1,7 +1,8 @@
+---
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
-  name: petclinic-build
+  name: openshift-helloworld-build
 spec:
   params:
     - name: APP_SOURCE_GIT
@@ -23,49 +24,77 @@ spec:
     - name: output
       workspace: workspace
     params:
+    - name: revision
+      value: "develop"
+    - name: depth
+      value: "0"
     - name: url
       value: $(params.APP_SOURCE_GIT)
-    - name: deleteExisting
-      value: "true"
-  - name: build-image
+  - name: source-clone
     taskRef:
-      name: s2i-java-11
-    runAfter:
-    - release-app
+      name: git-clone
+      kind: ClusterTask
+    workspaces:
+    - name: output
+      workspace: workspace
     params:
-      - name: TLSVERIFY
-        value: "false"
-      - name: MAVEN_MIRROR_URL
-        value: http://nexus:8081/repository/maven-public/
-      - name: PATH_CONTEXT
-        value: spring-petclinic/target
-      - name: IMAGE_NAME
-        value: image-registry.openshift-image-registry.svc:5000/$(context.pipelineRun.namespace)/spring-petclinic
-      - name: IMAGE_TAG
-        value: $(params.APP_IMAGE_TAG)
+    - name: revision
+      value: "develop"
+    - name: depth
+      value: "0"
+    - name: url
+      value: $(params.APP_SOURCE_GIT)      
+  - name: source-version
+    taskRef:
+      name: git-version
+      kind: Task
     workspaces:
     - name: source
       workspace: workspace
-  - name: update-deployment
-    runAfter:
-    - build-image
-    taskRef:
-      name: git-update-deployment
     params:
-      - name: GIT_REPOSITORY
-        value: "$(params.APP_MANIFESTS_GIT)"
-      - name: GIT_USERNAME
-        value: gogs
-      - name: GIT_PASSWORD
-        value: gogs
-      - name: CURRENT_IMAGE
-        value: quay.io/siamaksade/spring-petclinic:latest
-      - name: NEW_IMAGE
-        value: image-registry.openshift-image-registry.svc:5000/$(context.pipelineRun.namespace)/spring-petclinic
-      - name: NEW_DIGEST
-        value: "$(tasks.build-image.results.IMAGE_DIGEST)"
-      - name: KUSTOMIZATION_PATH
-        value: environments/dev
-    workspaces:
-    - name: workspace
-      workspace: workspace
+    - name: branch
+      value: develop
+    runAfter:
+    - source-clone
+  # - name: build-image
+  #   taskRef:
+  #     name: s2i-java-11
+  #   runAfter:
+  #   - release-app
+  #   params:
+  #     - name: TLSVERIFY
+  #       value: "false"
+  #     - name: MAVEN_MIRROR_URL
+  #       value: http://nexus:8081/repository/maven-public/
+  #     - name: PATH_CONTEXT
+  #       value: spring-petclinic/target
+  #     - name: IMAGE_NAME
+  #       value: image-registry.openshift-image-registry.svc:5000/$(context.pipelineRun.namespace)/spring-petclinic
+  #     - name: IMAGE_TAG
+  #       value: $(params.APP_IMAGE_TAG)
+  #   workspaces:
+  #   - name: source
+  #     workspace: workspace
+  # - name: update-deployment
+  #   runAfter:
+  #   - build-image
+  #   taskRef:
+  #     name: git-update-deployment
+  #   params:
+  #     - name: GIT_REPOSITORY
+  #       value: "$(params.APP_MANIFESTS_GIT)"
+  #     - name: GIT_USERNAME
+  #       value: gogs
+  #     - name: GIT_PASSWORD
+  #       value: gogs
+  #     - name: CURRENT_IMAGE
+  #       value: quay.io/siamaksade/spring-petclinic:latest
+  #     - name: NEW_IMAGE
+  #       value: image-registry.openshift-image-registry.svc:5000/$(context.pipelineRun.namespace)/spring-petclinic
+  #     - name: NEW_DIGEST
+  #       value: "$(tasks.build-image.results.IMAGE_DIGEST)"
+  #     - name: KUSTOMIZATION_PATH
+  #       value: environments/dev
+    # workspaces:
+    # - name: workspace
+    #   workspace: workspace

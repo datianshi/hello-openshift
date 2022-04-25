@@ -1,0 +1,20 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: go-test
+spec:
+  description: >-
+    This task is to test golang
+  steps:
+    - image: golang:1.18.1-alpine3.15
+      name: test
+      workingDir: $(workspaces.source.path)
+      securityContext:
+        runAsUser: 0
+      script: |
+        #!/usr/bin/env bash
+        go test ./..
+  workspaces:
+    - name: source
+      description: A workspace that contain the source code to test.

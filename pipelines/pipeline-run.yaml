@@ -1,0 +1,12 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  generateName: openshift-hello-build-
+spec:
+  params:
+  pipelineRef:
+    name: openshift-helloworld-build
+  workspaces:
+    - name: workspace
+      persistentVolumeClaim:
+        claimName: openshift-hello-build-workspace
