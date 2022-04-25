@@ -12,9 +12,11 @@ spec:
     - name: APP_MANIFESTS_GIT
       type: string
       description: The application manifests git repository
-      default: https://github.com/datianshi/hello-openshift-config
+      default: git@github.com:datianshi/hello-openshift-config.git
   workspaces:
-  - name: workspace
+  - name: source-workspace
+  - name: gitops-workspace
+  - name: gitops-gitsecret
   tasks:
   - name: source-clone
     taskRef:
@@ -22,7 +24,7 @@ spec:
       kind: ClusterTask
     workspaces:
     - name: output
-      workspace: workspace
+      workspace: source-workspace
     params:
     - name: revision
       value: "develop"
@@ -30,71 +32,57 @@ spec:
       value: "0"
     - name: url
       value: $(params.APP_SOURCE_GIT)
-  - name: source-clone
+  - name: unit-test
     taskRef:
-      name: git-clone
-      kind: ClusterTask
+      name: go-test
+      kind: Task
     workspaces:
-    - name: output
-      workspace: workspace
-    params:
-    - name: revision
-      value: "develop"
-    - name: depth
-      value: "0"
-    - name: url
-      value: $(params.APP_SOURCE_GIT)      
+    - name: source
+      workspace: source-workspace
+    runAfter:
+    - source-clone      
   - name: source-version
     taskRef:
       name: git-version
       kind: Task
     workspaces:
     - name: source
-      workspace: workspace
+      workspace: source-workspace
     params:
     - name: branch
       value: develop
     runAfter:
-    - source-clone
-  # - name: build-image
-  #   taskRef:
-  #     name: s2i-java-11
-  #   runAfter:
-  #   - release-app
-  #   params:
-  #     - name: TLSVERIFY
-  #       value: "false"
-  #     - name: MAVEN_MIRROR_URL
-  #       value: http://nexus:8081/repository/maven-public/
-  #     - name: PATH_CONTEXT
-  #       value: spring-petclinic/target
-  #     - name: IMAGE_NAME
-  #       value: image-registry.openshift-image-registry.svc:5000/$(context.pipelineRun.namespace)/spring-petclinic
-  #     - name: IMAGE_TAG
-  #       value: $(params.APP_IMAGE_TAG)
-  #   workspaces:
-  #   - name: source
-  #     workspace: workspace
-  # - name: update-deployment
-  #   runAfter:
-  #   - build-image
-  #   taskRef:
-  #     name: git-update-deployment
-  #   params:
-  #     - name: GIT_REPOSITORY
-  #       value: "$(params.APP_MANIFESTS_GIT)"
-  #     - name: GIT_USERNAME
-  #       value: gogs
-  #     - name: GIT_PASSWORD
-  #       value: gogs
-  #     - name: CURRENT_IMAGE
-  #       value: quay.io/siamaksade/spring-petclinic:latest
-  #     - name: NEW_IMAGE
-  #       value: image-registry.openshift-image-registry.svc:5000/$(context.pipelineRun.namespace)/spring-petclinic
-  #     - name: NEW_DIGEST
-  #       value: "$(tasks.build-image.results.IMAGE_DIGEST)"
-  #     - name: KUSTOMIZATION_PATH
-  #       value: environments/dev
-    # workspaces:
-    # - name: workspace
-    #   workspace: workspace
+    - unit-test
+  - name: build-image
+    taskRef:
+      name: s2i-go
+      kind: ClusterTask
+    runAfter:
+    - source-version
+    params:
+      - name: IMAGE
+        value: "quay.io/mobb/openshift-hello:$(tasks.source-version.results.gitVersion)"
+    workspaces:
+    - name: source
+      workspace: source-workspace
+  - name: update-deployment
+    runAfter:
+    - build-image
+    taskRef:
+      name: git-update-deployment
+    params:
+    - name: GIT_REPOSITORY
+      value: $(params.APP_MANIFESTS_GIT)
+    - name: CURRENT_IMAGE
+      value: "quay.io/mobb/openshift-hello:latest"
+    - name: NEW_IMAGE
+      value: "quay.io/mobb/openshift-hello:$(tasks.source-version.results.gitVersion)"
+    - name: NEW_DIGEST
+      value: "$(tasks.build-image.results.IMAGE_DIGEST)"
+    - name: KUSTOMIZATION_PATH
+      value: environments/staging
+    workspaces:
+    - name: workspace 
+      workspace: gitops-workspace
+    - name: ssh-directory
+      workspace: gitops-gitsecret

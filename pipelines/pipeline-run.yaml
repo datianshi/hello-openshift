@@ -7,6 +7,15 @@ spec:
   pipelineRef:
     name: openshift-helloworld-build
   workspaces:
-    - name: workspace
+    - name: source-workspace
       persistentVolumeClaim:
         claimName: openshift-hello-build-workspace
+      subPath: source
+    - name: gitops-workspace
+      persistentVolumeClaim:
+        claimName: openshift-hello-build-workspace
+      subPath: gitops
+    - name: gitops-gitsecret
+      secret:
+        secretName: quay-io
+
