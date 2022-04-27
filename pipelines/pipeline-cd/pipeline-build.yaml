@@ -21,7 +21,7 @@ spec:
     - name: GIT_REFSPEC
       type: string
       description: RefSpec
-      default: "+refs/heads/*:refs/remotes/origin/*"
+      default: "+refs/heads/*:refs/remotes/origin/*"      
     - name: GIT_REVISION
       type: string
       description: The git revision
@@ -42,23 +42,23 @@ spec:
     - name: output
       workspace: source-workspace
     params:
+    - name: refspec
+      value: $(params.GIT_REFSPEC)    
     - name: revision
       value: $(params.GIT_REVISION)
-    - name: refspec
-      value: $(params.GIT_REFSPEC)      
     - name: depth
       value: "0"
     - name: url
       value: $(params.GIT_REPO)
-  # - name: unit-test
-  #   taskRef:
-  #     name: go-test
-  #     kind: Task
-  #   workspaces:
-  #   - name: source
-  #     workspace: source-workspace
-  #   runAfter:
-  #   - source-clone      
+  - name: unit-test
+    taskRef:
+      name: go-test
+      kind: Task
+    workspaces:
+    - name: source
+      workspace: source-workspace
+    runAfter:
+    - source-clone
   - name: source-version
     taskRef:
       name: git-version
@@ -69,8 +69,10 @@ spec:
     params:
     - name: branch
       value: develop
+    - name: revision
+      value: $(params.GIT_REVISION)      
     runAfter:
-    - source-clone
+    - unit-test
   - name: build-image
     taskRef:
       name: s2i-go

@@ -17,7 +17,7 @@ spec:
       kind: PipelineRun
       metadata:
         labels:
-          tekton.dev/pipeline: hello-openshift-prod-deploy
+          tekton.dev/pipeline: hello-openshift
         name: prod-deploy-$(uid)
       spec:
         params:
