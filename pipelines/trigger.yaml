@@ -39,7 +39,7 @@ spec:
           subPath: gitops
         - name: gitops-gitsecret
           secret:
-            secretName: quay-io
+            secretName: git-ssh-credentials-hello-openshift-config
 ---
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: TriggerBinding
