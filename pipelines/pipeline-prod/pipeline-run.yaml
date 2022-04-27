@@ -4,6 +4,8 @@ metadata:
   generateName: openshift-hello-prod-deploy-
 spec:
   params:
+  - name: GIT_TAG
+    value: 0.1.2
   pipelineRef:
     name: openshift-helloworld-prod-deploy
   workspaces:
