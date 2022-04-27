@@ -11,7 +11,7 @@ import (
 func helloHandler(w http.ResponseWriter, r *http.Request) {
 	response := os.Getenv("RESPONSE")
 	if len(response) == 0 {
-		response = "Hello OpenShift!"
+		response = "Hello OpenShift! I am Shaozhen Ding"
 	}
 
 	// Echo back the port the request was received on
@@ -49,4 +49,3 @@ func main() {
 
 	select {}
 }
-
