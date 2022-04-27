@@ -3,6 +3,7 @@ apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
   name: openshift-helloworld-build
+  namespace: demo-pipeline
 spec:
   params:
     - name: GIT_REPO

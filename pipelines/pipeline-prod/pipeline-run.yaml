@@ -1,0 +1,20 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  generateName: openshift-hello-prod-deploy-
+spec:
+  params:
+  pipelineRef:
+    name: openshift-helloworld-prod-deploy
+  workspaces:
+    - name: source-workspace
+      persistentVolumeClaim:
+        claimName: openshift-hello-prod-deploy-workspace
+      subPath: source
+    - name: gitops-workspace
+      persistentVolumeClaim:
+        claimName: openshift-hello-prod-deploy-workspace
+      subPath: gitops
+    - name: gitops-gitsecret
+      secret:
+        secretName: git-ssh-credentials-hello-openshift-config

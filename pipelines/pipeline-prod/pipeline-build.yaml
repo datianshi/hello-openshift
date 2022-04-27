@@ -3,6 +3,7 @@ apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
   name: openshift-helloworld-prod-deploy
+  namespace: demo-pipeline
 spec:
   params:
     - name: GIT_REPO
@@ -29,7 +30,7 @@ spec:
       workspace: source-workspace
     params:
     - name: revision
-      value: $(params.GIT_BRANCH)
+      value: $(params.GIT_TAG)
     - name: depth
       value: "0"
     - name: url
