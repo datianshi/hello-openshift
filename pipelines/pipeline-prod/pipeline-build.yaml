@@ -16,10 +16,6 @@ spec:
       default: git@github.com:datianshi/hello-openshift-config.git
     - name: GIT_TAG
       type: string
-    - name: GIT_REFSPEC
-      type: string
-      description: RefSpec
-      default: "+refs/heads/*:refs/remotes/origin/*"      
   workspaces:
   - name: source-workspace
   - name: gitops-workspace
@@ -35,10 +31,6 @@ spec:
     params:
     - name: revision
       value: $(params.GIT_TAG)
-    - name: depth
-      value: "0"
-    - name: refspec
-      value: $(params.GIT_REFSPEC)      
     - name: url
       value: $(params.GIT_REPO)
   - name: build-image
@@ -46,7 +38,7 @@ spec:
       name: s2i-go
       kind: ClusterTask
     runAfter:
-    - source-version
+    - source-clone
     params:
       - name: IMAGE
         value: "quay.io/mobb/openshift-hello:$(params.GIT_TAG)"
