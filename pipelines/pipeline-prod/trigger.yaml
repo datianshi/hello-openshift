@@ -18,7 +18,7 @@ spec:
       metadata:
         labels:
           tekton.dev/pipeline: hello-openshift-prod-deploy
-        name: hello-openshift-prod-deploy-$(uid)
+        name: prod-deploy-$(uid)
       spec:
         params:
           - name: APP_NAME
