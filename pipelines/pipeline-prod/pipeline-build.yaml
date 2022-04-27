@@ -41,18 +41,6 @@ spec:
       value: $(params.GIT_REFSPEC)      
     - name: url
       value: $(params.GIT_REPO)
-  - name: source-version
-    taskRef:
-      name: git-version
-      kind: Task
-    workspaces:
-    - name: source
-      workspace: source-workspace
-    params:
-    - name: branch
-      value: develop
-    runAfter:
-    - source-clone
   - name: build-image
     taskRef:
       name: s2i-go
@@ -61,7 +49,7 @@ spec:
     - source-version
     params:
       - name: IMAGE
-        value: "quay.io/mobb/openshift-hello:$(tasks.source-version.results.gitVersion)"
+        value: "quay.io/mobb/openshift-hello:$(params.GIT_TAG)"
     workspaces:
     - name: source
       workspace: source-workspace
@@ -76,7 +64,7 @@ spec:
     - name: CURRENT_IMAGE
       value: "quay.io/mobb/openshift-hello:latest"
     - name: NEW_IMAGE
-      value: "quay.io/mobb/openshift-hello:$(tasks.source-version.results.gitVersion)"
+      value: "quay.io/mobb/openshift-hello:$(params.GIT_TAG)"
     - name: NEW_DIGEST
       value: "$(tasks.build-image.results.IMAGE_DIGEST)"
     - name: KUSTOMIZATION_PATH
