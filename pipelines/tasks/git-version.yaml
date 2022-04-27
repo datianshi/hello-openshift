@@ -39,6 +39,8 @@ spec:
         #!/usr/bin/env sh
         export PATH="$PATH:/tekton/home/.dotnet/tools"
         dotnet tool install GitVersion.Tool --version 5.10.1 --tool-path "/tekton/home/.dotnet/tools"
+        ## To keep the tag history
+        git checkout origin/main -b main
         git checkout -b "${PARAM_BRANCH}" "${PARAM_REVISION}"
         export GITVERSION=$(dotnet gitversion /showvariable FullSemVer)
         echo -n "${GITVERSION}" | tee $(results.gitVersion.path)
