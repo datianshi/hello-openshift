@@ -5,6 +5,8 @@ metadata:
 spec:
   params:
   pipelineRef:
+    labels:
+      tekton.dev/pipeline: hello-openshift
     name: openshift-helloworld-build
   workspaces:
     - name: source-workspace

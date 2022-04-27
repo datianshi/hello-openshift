@@ -13,8 +13,8 @@ spec:
       securityContext:
         runAsUser: 0
       script: |
-        #!/usr/bin/env sh
-        go test ./..
+        #!/usr/bin/env sh        
+        CGO_ENABLED=0 go test ./...
   workspaces:
     - name: source
       description: A workspace that contain the source code to test.
