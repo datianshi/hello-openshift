@@ -21,7 +21,7 @@ spec:
     - name: GIT_REFSPEC
       type: string
       description: RefSpec
-      default: "+refs/heads/*:refs/remotes/origin/*"
+      default: "+refs/heads/*:refs/remotes/origin/*"      
     - name: GIT_REVISION
       type: string
       description: The git revision
@@ -42,10 +42,10 @@ spec:
     - name: output
       workspace: source-workspace
     params:
+    - name: refspec
+      value: $(params.GIT_REFSPEC)    
     - name: revision
       value: $(params.GIT_REVISION)
-    - name: refspec
-      value: $(params.GIT_REFSPEC)      
     - name: depth
       value: "0"
     - name: url
@@ -69,6 +69,8 @@ spec:
     params:
     - name: branch
       value: develop
+    - name: revision
+      value: $(params.GIT_REVISION)      
     runAfter:
     - unit-test
   - name: build-image

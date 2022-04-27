@@ -18,6 +18,9 @@ spec:
     - description: branch to checkout to create a version for e.g. "develop"
       name: branch
       type: string
+    - description: revision to checkout
+      name: revision
+      type: string      
   results:
     - description: The calculated git version you could use for git tagging e.g. "0.1.0-tektonize.1-188"
       name: gitVersion
@@ -28,13 +31,15 @@ spec:
       securityContext:
         runAsUser: 0
       env:
+        - name: PARAM_REVISION
+          value: $(params.revision)
         - name: PARAM_BRANCH
-          value: $(params.branch)
+          value: $(params.branch)          
       script: |
         #!/usr/bin/env sh
         export PATH="$PATH:/tekton/home/.dotnet/tools"
         dotnet tool install GitVersion.Tool --version 5.10.1 --tool-path "/tekton/home/.dotnet/tools"
-        git checkout "${PARAM_BRANCH}"
+        git checkout -b "${PARAM_BRANCH}" "${PARAM_REVISION}"
         export GITVERSION=$(dotnet gitversion /showvariable FullSemVer)
         echo -n "${GITVERSION}" | tee $(results.gitVersion.path)
         # normalize a bit because
