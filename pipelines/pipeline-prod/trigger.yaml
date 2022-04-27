@@ -6,7 +6,6 @@ metadata:
   namespace: demo-pipeline
 spec:
   params:
-    - name: git-revision
     - name: git-tag
     - name: git-commit-message
     - name: git-repo-url
@@ -18,20 +17,18 @@ spec:
       kind: PipelineRun
       metadata:
         labels:
-          tekton.dev/pipeline: hello-openshift
-        name: hello-openshift-$(uid)
+          tekton.dev/pipeline: hello-openshift-prod-deploy
+        name: hello-openshift-prod-deploy-$(uid)
       spec:
         params:
           - name: APP_NAME
             value: $(tt.params.git-repo-name)
           - name: GIT_REPO
             value: $(tt.params.git-repo-url)
-          - name: GIT_REVISION
-            value: $(tt.params.git-revision)
           - name: GIT_TAG
-            value: $(tt.params.git-tag) 
+            value: $(tt.params.git-tag)
         pipelineRef:
-          name: openshift-helloworld-build-prod-deploy
+          name: openshift-helloworld-prod-deploy
         workspaces:
         - name: source-workspace
           persistentVolumeClaim:
@@ -52,11 +49,11 @@ metadata:
 spec:
   params:
   - name: git-repo-url
-    value: $(body.repository.url)
+    value: $(body.repository.html_url)
   - name: git-repo-name
     value: $(body.repository.name)
-  - name: git-revision
-    value: $(body.after)
+  - name: git-tag
+    value: $(body.ref)    
 ---
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: EventListener
@@ -65,7 +62,7 @@ metadata:
 spec:
   serviceAccountName: pipeline
   triggers:
-    - name: hello-openshift
+    - name: hello-openshift-prod-deploy
       interceptors:
       - ref:
           name: "github"
@@ -92,5 +89,5 @@ spec:
     targetPort: http-listener
   to:
     kind: Service
-    name: el-hello-openshift
+    name: el-hello-openshift-prod-deploy
     weight: 100

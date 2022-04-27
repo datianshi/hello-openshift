@@ -18,6 +18,13 @@ spec:
       type: string
       description: The application repo branch
       default: develop
+    - name: GIT_REFSPEC
+      type: string
+      description: RefSpec
+      default: "+refs/heads/*:refs/remotes/origin/*"
+    - name: GIT_REVISION
+      type: string
+      description: The git revision
   workspaces:
   - name: source-workspace
   - name: gitops-workspace
@@ -36,7 +43,9 @@ spec:
       workspace: source-workspace
     params:
     - name: revision
-      value: $(params.GIT_BRANCH)
+      value: $(params.GIT_REVISION)
+    - name: refspec
+      value: $(params.GIT_REFSPEC)      
     - name: depth
       value: "0"
     - name: url
