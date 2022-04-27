@@ -2,10 +2,10 @@
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
-  name: openshift-helloworld-build
+  name: openshift-helloworld-prod-deploy
 spec:
   params:
-    - name: APP_SOURCE_GIT
+    - name: GIT_REPO
       type: string
       description: The application git repository
       default: https://github.com/datianshi/hello-openshift
@@ -13,6 +13,8 @@ spec:
       type: string
       description: The application manifests git repository
       default: git@github.com:datianshi/hello-openshift-config.git
+    - name: GIT_TAG
+      type: string
   workspaces:
   - name: source-workspace
   - name: gitops-workspace
@@ -27,20 +29,11 @@ spec:
       workspace: source-workspace
     params:
     - name: revision
-      value: "develop"
+      value: $(params.GIT_BRANCH)
     - name: depth
       value: "0"
     - name: url
-      value: $(params.APP_SOURCE_GIT)
-  # - name: unit-test
-  #   taskRef:
-  #     name: go-test
-  #     kind: Task
-  #   workspaces:
-  #   - name: source
-  #     workspace: source-workspace
-  #   runAfter:
-  #   - source-clone      
+      value: $(params.GIT_REPO)
   - name: source-version
     taskRef:
       name: git-version
@@ -80,7 +73,7 @@ spec:
     - name: NEW_DIGEST
       value: "$(tasks.build-image.results.IMAGE_DIGEST)"
     - name: KUSTOMIZATION_PATH
-      value: environments/staging
+      value: environments/production
     workspaces:
     - name: workspace 
       workspace: gitops-workspace

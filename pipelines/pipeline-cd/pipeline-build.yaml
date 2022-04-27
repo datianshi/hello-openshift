@@ -1,0 +1,96 @@
+---
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: openshift-helloworld-build
+spec:
+  params:
+    - name: GIT_REPO
+      type: string
+      description: The application git repository
+      default: https://github.com/datianshi/hello-openshift
+    - name: APP_MANIFESTS_GIT
+      type: string
+      description: The application manifests git repository
+      default: git@github.com:datianshi/hello-openshift-config.git
+    - name: GIT_BRANCH
+      type: string
+      description: The application repo branch
+      default: develop
+  workspaces:
+  - name: source-workspace
+  - name: gitops-workspace
+  - name: gitops-gitsecret
+  tasks:
+  - name: source-clone
+    when:
+    - input: "$(params.GIT_BRANCH)"
+      operator: in
+      values: ["develop"]
+    taskRef:
+      name: git-clone
+      kind: ClusterTask
+    workspaces:
+    - name: output
+      workspace: source-workspace
+    params:
+    - name: revision
+      value: $(params.GIT_BRANCH)
+    - name: depth
+      value: "0"
+    - name: url
+      value: $(params.GIT_REPO)
+  # - name: unit-test
+  #   taskRef:
+  #     name: go-test
+  #     kind: Task
+  #   workspaces:
+  #   - name: source
+  #     workspace: source-workspace
+  #   runAfter:
+  #   - source-clone      
+  - name: source-version
+    taskRef:
+      name: git-version
+      kind: Task
+    workspaces:
+    - name: source
+      workspace: source-workspace
+    params:
+    - name: branch
+      value: develop
+    runAfter:
+    - source-clone
+  - name: build-image
+    taskRef:
+      name: s2i-go
+      kind: ClusterTask
+    runAfter:
+    - source-version
+    params:
+      - name: IMAGE
+        value: "quay.io/mobb/openshift-hello:$(tasks.source-version.results.gitVersion)"
+    workspaces:
+    - name: source
+      workspace: source-workspace
+  - name: update-deployment
+    runAfter:
+    - build-image
+    taskRef:
+      name: git-update-deployment
+    params:
+    - name: GIT_REPOSITORY
+      value: $(params.APP_MANIFESTS_GIT)
+    - name: CURRENT_IMAGE
+      value: "quay.io/mobb/openshift-hello:latest"
+    - name: NEW_IMAGE
+      value: "quay.io/mobb/openshift-hello:$(tasks.source-version.results.gitVersion)"
+    - name: NEW_DIGEST
+      value: "$(tasks.build-image.results.IMAGE_DIGEST)"
+    - name: KUSTOMIZATION_PATH
+      value: environments/staging
+    workspaces:
+    - name: workspace 
+      workspace: gitops-workspace
+    - name: ssh-directory
+      workspace: gitops-gitsecret

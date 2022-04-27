@@ -6,6 +6,7 @@ metadata:
 spec:
   params:
     - name: git-revision
+    - name: git-branch
     - name: git-commit-message
     - name: git-repo-url
     - name: git-repo-name
@@ -26,6 +27,8 @@ spec:
             value: $(tt.params.git-repo-url)
           - name: GIT_REVISION
             value: $(tt.params.git-revision)
+          - name: GIT_BRANCH
+            value: $(tt.params.git-branch) 
         pipelineRef:
           name: openshift-helloworld-build
         workspaces:
@@ -47,6 +50,8 @@ metadata:
   name: hello-openshift
 spec:
   params:
+  - name: git-branch
+    value: $(extensions.branch_name)  
   - name: git-repo-url
     value: $(body.repository.url)
   - name: git-repo-name
@@ -62,6 +67,11 @@ spec:
   serviceAccountName: pipeline
   triggers:
     - name: hello-openshift
+      interceptors:
+      - cel:
+          overlays:
+          - key: branch_name
+            expression: "body.ref.split('/')[2]"
       bindings:
         - ref: hello-openshift
       template:
