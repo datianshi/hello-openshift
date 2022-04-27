@@ -32,15 +32,15 @@ spec:
       value: "0"
     - name: url
       value: $(params.APP_SOURCE_GIT)
-  - name: unit-test
-    taskRef:
-      name: go-test
-      kind: Task
-    workspaces:
-    - name: source
-      workspace: source-workspace
-    runAfter:
-    - source-clone      
+  # - name: unit-test
+  #   taskRef:
+  #     name: go-test
+  #     kind: Task
+  #   workspaces:
+  #   - name: source
+  #     workspace: source-workspace
+  #   runAfter:
+  #   - source-clone      
   - name: source-version
     taskRef:
       name: git-version
@@ -52,7 +52,7 @@ spec:
     - name: branch
       value: develop
     runAfter:
-    - unit-test
+    - source-clone
   - name: build-image
     taskRef:
       name: s2i-go

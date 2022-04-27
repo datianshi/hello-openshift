@@ -1,0 +1,17 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: hello-openshift-prod
+  namespace: openshift-gitops
+spec:
+  destination:
+    namespace: demo-prod
+    server: https://kubernetes.default.svc
+  project: demo
+  source:
+    path: environments/production
+    repoURL: https://github.com/datianshi/hello-openshift-config
+    targetRevision: HEAD
+  syncPolicy:
+    automated:
+      prune: true

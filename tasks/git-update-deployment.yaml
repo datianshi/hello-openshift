@@ -19,6 +19,9 @@ spec:
       type: string
     - name: NEW_DIGEST
       type: string
+    - name: USER_HOME
+      type: string
+      default: "/root"
     - name: KUSTOMIZATION_PATH
       type: string
   workspaces:
@@ -40,20 +43,23 @@ spec:
       image: docker.io/alpine/git:v2.26.2
       workingDir: $(workspaces.workspace.path)
       env: 
+      - name: PARAM_USER_HOME
+        value: $(params.USER_HOME)      
       - name: WORKSPACE_SSH_DIRECTORY_BOUND
         value: $(workspaces.ssh-directory.bound)
       - name: WORKSPACE_SSH_DIRECTORY_PATH
         value: $(workspaces.ssh-directory.path)
       script: |
+        rm -rf git-update-digest-workdir
         cp -R "${WORKSPACE_SSH_DIRECTORY_PATH}" "${PARAM_USER_HOME}"/.ssh
         chmod 700 "${PARAM_USER_HOME}"/.ssh
         chmod -R 400 "${PARAM_USER_HOME}"/.ssh/*
-        git clone $(params.GIT_REPOSITORY)
+        git clone $(params.GIT_REPOSITORY) git-update-digest-workdir
     - name: update-digest
       image: k8s.gcr.io/kustomize/kustomize:v3.8.7
       workingDir: $(workspaces.workspace.path)
       script: |
-        cd $(params.KUSTOMIZATION_PATH)
+        cd git-update-digest-workdir/$(params.KUSTOMIZATION_PATH)
         /app/kustomize edit set image $(params.CURRENT_IMAGE)=$(params.NEW_IMAGE)@$(params.NEW_DIGEST)
         echo "##########################"
         echo "### kustomization.yaml ###"
@@ -62,14 +68,24 @@ spec:
     - name: git-commit
       image: docker.io/alpine/git:v2.26.2
       workingDir: $(workspaces.workspace.path)
+      env: 
+      - name: PARAM_USER_HOME
+        value: $(params.USER_HOME)      
+      - name: WORKSPACE_SSH_DIRECTORY_BOUND
+        value: $(workspaces.ssh-directory.bound)
+      - name: WORKSPACE_SSH_DIRECTORY_PATH
+        value: $(workspaces.ssh-directory.path)      
       script: |
+        cp -R "${WORKSPACE_SSH_DIRECTORY_PATH}" "${PARAM_USER_HOME}"/.ssh
+        chmod 700 "${PARAM_USER_HOME}"/.ssh
+        chmod -R 400 "${PARAM_USER_HOME}"/.ssh/*
+        cd git-update-digest-workdir
         git config user.email "tekton-pipelines-ci@redhat.com"
         git config user.name "tekton-pipelines-ci"
         git status
         git add $(params.KUSTOMIZATION_PATH)/kustomization.yaml
-        git commit -m "[ci] Image digest updated"
-        git remote add auth-origin $(echo $(params.GIT_REPOSITORY)
-        git push auth-origin master
+        git commit -m "[ci] Image updated with $(params.NEW_IMAGE)@$(params.NEW_DIGEST)"
+        git push origin main
         RESULT_SHA="$(git rev-parse HEAD | tr -d '\n')"
         EXIT_CODE="$?"
         if [ "$EXIT_CODE" != 0 ]

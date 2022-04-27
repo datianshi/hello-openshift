@@ -21,8 +21,6 @@ spec:
   results:
     - description: The calculated git version you could use for git tagging e.g. "0.1.0-tektonize.1-188"
       name: gitVersion
-    - description: A normalized version for use in container images e.g. "0.1.0-tektonize.1-188"
-      name: packageVersion
   steps:
     - image: mcr.microsoft.com/dotnet/sdk:6.0.202-alpine3.15-amd64
       name: set-git-version
@@ -41,8 +39,8 @@ spec:
         echo -n "${GITVERSION}" | tee $(results.gitVersion.path)
         # normalize a bit because
         # image tags can only contain `abcdefghijklmnopqrstuvwxyz0123456789_-.ABCDEFGHIJKLMNOPQRSTUVWXYZ`
-        export PACKAGEVERSION=$(echo -n $GITVERSION | sed 's/[^-._0-9A-Za-z]/-/g')
-        echo -n "${PACKAGEVERSION}" | tee $(results.packageVersion.path)
+        # export PACKAGEVERSION=$(echo -n $GITVERSION | sed 's/[^-._0-9A-Za-z]/-/g')
+        # echo -n "${PACKAGEVERSION}" | tee $(results.packageVersion.path)
   workspaces:
     - name: source
       description: A workspace that contains the fetched git repository to create a version for.
