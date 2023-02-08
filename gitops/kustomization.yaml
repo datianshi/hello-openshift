@@ -3,5 +3,5 @@ kind: Kustomization
 resources:
 - project.yaml
 - repo.yaml
-- overlay/prod
+# - overlay/prod
 - overlay/staging
