@@ -13,10 +13,11 @@ oc apply -f https://raw.githubusercontent.com/tektoncd/catalog/main/task/git-ver
 
 
 ```
+oc project demo-pipeline
 oc create secret docker-registry quay-io \
     --docker-server=quay.io \
     --docker-username=<user_name> \
     --docker-password=<password> \
     --docker-email=<email>
-oc secret link default quay-io    
+oc secret link default quay-io
 ```

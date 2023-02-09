@@ -11,11 +11,9 @@ import (
 func helloHandler(w http.ResponseWriter, r *http.Request) {
 	response := os.Getenv("RESPONSE")
 	if len(response) == 0 {
-		response = "Hello OpenShift! I am Shaozhen"
+		response = "Hello OpenShift! I am argocd"
 	}
 
-	// Echo back the port the request was received on
-	// via a "request-port" header.
 	addr := r.Context().Value(http.LocalAddrContextKey).(net.Addr)
 	if tcpAddr, ok := addr.(*net.TCPAddr); ok {
 		w.Header().Set("x-request-port", strconv.Itoa(tcpAddr.Port))
