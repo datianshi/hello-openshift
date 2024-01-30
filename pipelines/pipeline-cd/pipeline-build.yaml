@@ -17,7 +17,7 @@ spec:
     - name: GIT_BRANCH
       type: string
       description: The application repo branch
-      default: develop
+      default: docker
     - name: GIT_REFSPEC
       type: string
       description: RefSpec

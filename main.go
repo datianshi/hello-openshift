@@ -11,7 +11,7 @@ import (
 func helloHandler(w http.ResponseWriter, r *http.Request) {
 	response := os.Getenv("RESPONSE")
 	if len(response) == 0 {
-		response = "Hello OpenShift! I am argocd"
+		response = "Hello OpenShift! I am shaozhen"
 	}
 
 	addr := r.Context().Value(http.LocalAddrContextKey).(net.Addr)
