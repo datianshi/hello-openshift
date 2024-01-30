@@ -6,8 +6,8 @@ oc apply -f https://raw.githubusercontent.com/tektoncd/catalog/main/task/git-ver
 
 * Create ssh secret for github
 * Create quay.io secret
-* oc create ns demo-pipeline
-* oc create ns demo-staging
+* oc new-project demo-pipeline
+* oc new-project demo-staging
 * oc apply -k gitops/overlay/staging
 * oc apply -k pipelines
 
