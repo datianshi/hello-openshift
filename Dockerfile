@@ -1,6 +1,7 @@
 FROM registry.access.redhat.com/ubi8/go-toolset:1.18.10-1
 
 WORKDIR /app
+RUN chown default /app
 
 COPY go.mod ./
 RUN go mod download

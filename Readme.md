@@ -1,7 +1,7 @@
 
-
+* oc apply -k operators
 ```
-oc apply -f https://raw.githubusercontent.com/tektoncd/catalog/main/task/git-version/0.1/git-version.yaml
+oc apply -f pipelines/tasks/git-version.yaml
 ```
 
 * oc new-project demo-pipeline
@@ -12,9 +12,9 @@ oc apply -f https://raw.githubusercontent.com/tektoncd/catalog/main/task/git-ver
         --docker-username=<user_name> \
         --docker-password=<password> \
         --docker-email=<email>
-    oc secret link default quay-io
+    
 ```
 * Create ssh secret for github
 * oc apply -k pipelines
-* oc apply -k gitops/overlay/staging
 * oc new-project demo-staging
+* oc apply -k gitops/
