@@ -14,6 +14,7 @@ oc apply -f pipelines/tasks/git-version.yaml
         --docker-email=<email>
     
 ```
+* oc secret link pipeline quay-io
 * Create ssh secret for github
 * oc apply -k pipelines
 * oc new-project demo-staging
