@@ -6,6 +6,8 @@ spec:
   params:
   - name: IMAGE_URL
     value: shaozhendemoregistry.azurecr.io/mobb/hello-openshift
+  - name: GIT_REVISION
+    value: 5b4744361d5cb1f245f0c0ae08e6bece1f1a5529
   pipelineRef:
     name: openshift-helloworld-build
   workspaces:
