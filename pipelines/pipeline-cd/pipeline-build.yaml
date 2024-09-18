@@ -18,6 +18,10 @@ spec:
       type: string
       description: The application repo branch
       default: develop
+    - name: IMAGE_URL
+      type: string
+      description: The image url
+      default: quay.io/mobb/openshift-hello
     - name: GIT_REFSPEC
       type: string
       description: RefSpec
@@ -81,7 +85,7 @@ spec:
     - source-version
     params:
       - name: IMAGE
-        value: "quay.io/mobb/openshift-hello:$(tasks.source-version.results.gitVersion)"
+        value: "${params.IMAGE_URL}:$(tasks.source-version.results.gitVersion)"
     workspaces:
     - name: source
       workspace: source-workspace
@@ -94,9 +98,9 @@ spec:
     - name: GIT_REPOSITORY
       value: $(params.APP_MANIFESTS_GIT)
     - name: CURRENT_IMAGE
-      value: "quay.io/mobb/openshift-hello:latest"
+      value: "${params.IMAGE_URL}:latest"
     - name: NEW_IMAGE
-      value: "quay.io/mobb/openshift-hello:$(tasks.source-version.results.gitVersion)"
+      value: "${params.IMAGE_URL}:$(tasks.source-version.results.gitVersion)"
     - name: NEW_DIGEST
       value: "$(tasks.build-image.results.IMAGE_DIGEST)"
     - name: KUSTOMIZATION_PATH

@@ -4,9 +4,9 @@ metadata:
   generateName: openshift-hello-build-
 spec:
   params:
+  - name: IMAGE_URL
+    value: shaozhendemoregistry.azurecr.io/mobb/hello-openshift
   pipelineRef:
-    labels:
-      tekton.dev/pipeline: hello-openshift
     name: openshift-helloworld-build
   workspaces:
     - name: source-workspace
