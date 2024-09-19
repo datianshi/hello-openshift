@@ -21,7 +21,7 @@ spec:
     - name: IMAGE_URL
       type: string
       description: The image url
-      default: quay.io/mobb/openshift-hello
+      default: shaozhendemoregistry.azurecr.io/mobb/openshift-hello
     - name: GIT_REFSPEC
       type: string
       description: RefSpec
